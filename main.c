@@ -82,7 +82,10 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-uint8_t ADC1Readings[2];	 //global variable for DMA access of ADC readings
+uint8_t ADC1Readings[2];	// global variable for DMA access of ADC readings
+				// this array will continously be updated by DMA
+				// ADC1Readings[0] -> valor lido no PA0
+				// ADC1Readings[1] -> valor lido no PA1
 /* USER CODE END 0 */
 
 int main(void)
