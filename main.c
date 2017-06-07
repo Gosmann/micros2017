@@ -1,8 +1,16 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Description        : Main program body
-  ******************************************************************************
+  * Description        : main program body
+  * Author	       : Gabriel Gosmann and Diego Machado
+  * School	       : Fundação Escola Técnica Liberato Salzano Vieira da Cunha
+  * Subject	       : microprocessor systems
+  * Brief	       : this file configures a DMA implementation for STM32F411
+  * 		       : both for ADC conversion and serial transmission
+  *
+  * based on Marcos Zuccolotto's example.
+  *   
+    ******************************************************************************
   *
   * COPYRIGHT(c) 2017 STMicroelectronics
   *
