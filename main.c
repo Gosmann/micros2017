@@ -8,7 +8,8 @@
   * Teacher	       : Marcos Zuccolotto
   * Date	       : June, 2017.
   * Brief	       : this file configures a DMA implementation for STM32F411
-  * 		       : both for ADC conversion and serial transmission
+  * 		       : both for ADC conversion (PA0 and PA1) - ADC1 channels 0 and 1
+  *		       : and serial transmission (PA9 and PA10) - USART1
   *
   * based on Marcos Zuccolotto's example.
   *   
