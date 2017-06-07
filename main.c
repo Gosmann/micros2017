@@ -5,6 +5,8 @@
   * Author	       : Gabriel Gosmann and Diego Machado
   * School	       : Fundação Escola Técnica Liberato Salzano Vieira da Cunha
   * Subject	       : microprocessor systems
+  * Teacher	       : Marcos Zuccolotto
+  * Date	       : June, 2017.
   * Brief	       : this file configures a DMA implementation for STM32F411
   * 		       : both for ADC conversion and serial transmission
   *
@@ -41,36 +43,28 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
-
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc1;
-DMA_HandleTypeDef hdma_adc1;
+ADC_HandleTypeDef hadc1;		// configure ADC1 
+DMA_HandleTypeDef hdma_adc1;		// configure DMA at ADC1 
 
-TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim10;
+TIM_HandleTypeDef htim3;		// not used for this version
+TIM_HandleTypeDef htim10;		// not used for this version
 
-UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
-DMA_HandleTypeDef hdma_usart1_tx;
-DMA_HandleTypeDef hdma_usart2_tx;
-
+UART_HandleTypeDef huart1;		// configure USART1 at PA9 and PA10
+UART_HandleTypeDef huart2;		// configure USART2 at the standard usb port
+DMA_HandleTypeDef hdma_usart1_tx;	// configure DMA for USART1
+DMA_HandleTypeDef hdma_usart2_tx;	// configure DMA for USART2
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-//!Tamanho do buffer serial
-#define SERIAL_BUF 200
-//! Buffer de memoria da mensagem
-unsigned char msg[SERIAL_BUF];
-//! final da mensagem principal
-unsigned char *msgEnd;
-//! Comprimento da mensagem principal
-uint16_t   msgLength;
-//! Numero de mensagens enviadas
-uint16_t   msgNumber;
+#define SERIAL_BUF 200			//! Tamanho do buffer serial		
+unsigned char msg[SERIAL_BUF];		//! Buffer de memoria da mensagem
+unsigned char *msgEnd;			//! final da mensagem principal
+uint16_t   msgLength;			//! Comprimento da mensagem principal
+uint16_t   msgNumber;			//! Numero de mensagens enviadas
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -86,7 +80,6 @@ static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -96,67 +89,69 @@ uint8_t ADC1Readings[2];	// global variable for DMA access of ADC readings
 				// ADC1Readings[1] -> valor lido no PA1
 /* USER CODE END 0 */
 
-int main(void)
-{
+int main(void){
+/* USER CODE BEGIN 1 */
+/* USER CODE END 1 */
 
-  /* USER CODE BEGIN 1 */
+/* MCU Configuration----------------------------------------------------------*/
+/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+HAL_Init();
+/* Configure the system clock */
+SystemClock_Config();
+/* Initialize all configured peripherals */
+MX_GPIO_Init();
+MX_DMA_Init();			// inicialize DMA
+MX_ADC1_Init();			// inicialize ADC1
+MX_TIM3_Init();
+MX_TIM10_Init();
+MX_USART2_UART_Init();
+MX_USART1_UART_Init();
 
-  /* USER CODE END 1 */
+/* USER CODE BEGIN 2 */
+HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC1Readings, 2);
+// start ADC_DMA process 
+// the 2 values from ADC1 channel 0 and 1 (PA0 and PA1)
+// will be continuously stored at the ADC1Readings array
+// ADC1Readings[0] -> valor lido no PA0
+// ADC1Readings[1] -> valor lido no PA1
+// study the need for cast
 
-  /* MCU Configuration----------------------------------------------------------*/
+// this is from Zucco's example, modify for more elegant code
+// preparando a mensagem principal
+sprintf(msg,"");
+msgLength=strlen(msg);
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+msgEnd=msg+(msgLength*sizeof(unsigned char));
+sprintf(msgEnd,"");
+msgLength=strlen(msg);
 
-  /* Configure the system clock */
-  SystemClock_Config();
+msgNumber=1;
+msgEnd=msg+(msgLength*sizeof(unsigned char));
+sprintf(msgEnd," ",msgNumber);
+msgLength=strlen(msg);
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_ADC1_Init();
-  MX_TIM3_Init();
-  MX_TIM10_Init();
-  MX_USART2_UART_Init();
-  MX_USART1_UART_Init();
+HAL_UART_Transmit_DMA(&huart1, (uint8_t *)msg, msgLength);
+// start ADC_DMA process 
+// countinuously transmits an 8-bit word (msg) through serial
+// study the need for cast
+	
+/* USER CODE END 2 */
 
-  /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC1Readings, 2);
-
-   // preparando a mensagem principal
-   sprintf(msg,"");
-   msgLength=strlen(msg);
-
-   msgEnd=msg+(msgLength*sizeof(unsigned char));
-   sprintf(msgEnd,"");
-   msgLength=strlen(msg);
-
-   msgNumber=1;
-   msgEnd=msg+(msgLength*sizeof(unsigned char));
-    sprintf(msgEnd," ",msgNumber);
-    msgLength=strlen(msg);
-
-   HAL_UART_Transmit_DMA(&huart1, (uint8_t *) msg, msgLength);
-   /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
-
-  }
-  /* USER CODE END 3 */
-
+/* Infinite loop */
+/* USER CODE BEGIN WHILE */
+while (1){
+/* USER CODE END WHILE */
+/* USER CODE BEGIN 3 */
+// nothing to see here :)
+}
+/* USER CODE END 3 */
 }
 
+//hardware configuration
 /** System Clock Configuration
 */
-void SystemClock_Config(void)
-{
-
+void SystemClock_Config(void){
+	
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
@@ -400,21 +395,21 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 /**
- * @brief Atualiza numero mensagens enviadas
+ * @brief refresh the serial output with the current value on ADC
  * @param ponteiro para handler da serial
  * @retval nenhum
  */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	int x=0;
-	if(!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))x=1;
-	else x=0;
-	 msgNumber=(uint8_t *)ADC1Readings[x];
-	 sprintf(msgEnd,"%c",msgNumber);
-
+	if(!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))x=1;		// if standard board button is pressed -> ADC1Readings -> PA0
+	else x=0;						// else -> ADC1Readings -> PA1
+								// the ADC channel is changed when the button is pressed
+	msgNumber=(uint8_t *)ADC1Readings[x];	
+	sprintf(msgEnd,"%c",msgNumber);
 }
-
 /* USER CODE END 4 */
+
 
 /**
   * @brief  This function is executed in case of error occurrence.
